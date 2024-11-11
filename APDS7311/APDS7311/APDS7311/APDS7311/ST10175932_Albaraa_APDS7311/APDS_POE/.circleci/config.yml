@@ -1,0 +1,29 @@
+version: 2.1
+
+orbs:
+  sonarcloud: sonarsource/sonarcloud@2.0.0
+
+jobs:
+  build-and-test:
+    docker:
+      - image: cimg/node:18.16.0
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - v1-deps-{{ checksum "package.json" }}
+            - v1-deps-
+      - run:
+          name: Install Dependencies
+          command: npm install
+      - save_cache:
+          key: v1-deps-{{ checksum "package.json" }}
+          paths:
+            - node_modules
+      - sonarcloud/scan
+
+workflows:
+  main:
+    jobs:
+      - build-and-test:
+          context: SonarCloud
